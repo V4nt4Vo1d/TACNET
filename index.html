@@ -20,7 +20,7 @@
       <div class="panel"><!-- Panel for displaying info -->
         <h2>Intel</h2>
         <div class="stat">System: <strong>Stanton</strong></div>
-        <div class="stat">Ops Online: <strong>7</strong></div>
+        <div class="stat">Ops Online: <strong>0</strong></div>
         <div class="stat">Jump Gate: <strong>Pyro link unstable</strong></div>
       </div>
     </aside>
@@ -35,10 +35,10 @@
         <section class="panel" style="grid-column: 1 / -1;">
           <h2>Holochart · Stanton</h2>
           <div class="map-toolbar">
-            <a class="btn" href="#">System</a>
-            <a class="btn" href="#">Planet</a>
-            <a class="btn" href="#">Tactical</a>
-            <span class="stat">Tracking: <strong>Ships 12</strong> · <strong>Crew 35</strong></span>
+            <a class="btn" data-view="system" href="#">System</a>
+            <a class="btn" data-view="planet" href="#">Planet</a>
+            <a class="btn" data-view="tactical" href="#">Tactical</a>
+            <span class="stat">Tracking: <strong>Ships 14</strong> · <strong>Crew 2</strong></span>
           </div>
           <!-- Simple map view -->
           <div class="holo" role="img" aria-label="Holographic map of the Stanton system">
@@ -50,22 +50,20 @@
         <section class="panel">
           <h2>Active Ops</h2>
           <div class="roster"><!-- Active operations-->
-            <div class="row"><span>Convoy: HUR-L1 → ARCCORP</span><span class="tag">In Transit</span><span class="stat">ETA 12m</span></div>
-            <div class="row"><span>Patrol: CRU-L4 Ring</span><span class="tag">Green</span><span class="stat">T+31m</span></div>
-            <div class="row"><span>Mining: Shubin Claim</span><span class="tag" style="color:var(--warn);border-color:rgba(255,209,102,.4)">Caution</span><span class="stat">Yield 78%</span></div>
+            <div class="row"><span>Mining: Pure Carinite</span><span class="tag" style="color:var(--warn);border-color:rgba(255,209,102,.4)">Caution</span><span class="stat">Yield 0%</span></div>
           </div>
         </section>
 
         <section class="panel">
           <h2>Comms</h2>
-          <p class="stat">Last ping: <strong>CRU-L1 Relay</strong> · 00:42 UTC</p>
+          <p class="stat">Last ping: <strong>New Babbage</strong> · 00:00 UTC</p>
           <p class="stat">Fleet status: <strong>Nominal</strong></p>
         </section>
 
         <section class="panel">
           <h2>Shipyard</h2>
-          <p class="stat">Refit queue: <strong>3</strong> · Drydock: <strong>Orison</strong></p>
-          <p class="stat">Δ Blueprint sync up-to-date</p>
+          <p class="stat">Refit queue: <strong>11</strong> · Drydock: <strong>New Babbage</strong></p>
+          <p class="stat">Δ Blueprint sync out-of-date</p>
         </section>
       </div>
     </main>

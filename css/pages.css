@@ -25,3 +25,7 @@
   border-radius: 8px; padding: 8px 10px; background: #0a1118;
 }
 
+.btn.is-active {
+  outline: 1px solid rgba(23,231,255,.35);
+  box-shadow: 0 0 12px rgba(23,231,255,.25) inset;
+}
