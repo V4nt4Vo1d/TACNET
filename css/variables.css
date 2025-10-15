@@ -1,0 +1,31 @@
+:root {
+  /* colors */
+  --bg-0: #0b0f15;        /* deep space */
+  --bg-1: #0f1620;        /* card panels */
+  --grid: rgba(0, 255, 255, 0.06);
+
+  --cyan: #17e7ff;
+  --cyan-600: #13c6da;
+  --magenta: #ff3bd5;
+  --magenta-600: #dd31b7;
+  --text: #d6f7ff;
+  --text-dim: #97c8d3;
+  --good: #5af78e;
+  --warn: #ffd166;
+
+  /* radii & shadows */
+  --radius: 10px;
+  --glow: 0 0 24px rgba(23, 231, 255, 0.25);
+
+  /* sizing */
+  --maxw: 1200px;
+  --g: 12px; /* grid gap */
+
+  /* typography */
+  --font-ui: ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue",
+             Arial, "Noto Sans", "Liberation Sans", system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root { color-scheme: dark; } /* force dark UI without fighting the OS too much */
+}

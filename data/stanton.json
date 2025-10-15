@@ -1,0 +1,25 @@
+{
+  "system": "Stanton",
+  "star": { "name": "Stanton", "r": 28 },
+
+  "planets": [
+    { "name": "microTech", "orbit": 100, "angle": 350, "r": 12 },
+    { "name": "Hurston",   "orbit": 190, "angle": 225, "r": 15 },
+    { "name": "ArcCorp",   "orbit": 300, "angle": 30,  "r": 14 },
+    { "name": "Crusader",  "orbit": 420, "angle": 0,   "r": 18 }
+  ],
+
+  "jump_points": [
+    { "to": "Pyro", "orbit": 460, "angle": 300 }
+  ],
+
+  "assets": [
+    { "kind": "ship", "id": "FA-01", "label": "Hammerhead", "planet": "Crusader", "dx": -18, "dy": -12 },
+    { "kind": "ship", "id": "FA-12", "label": "Constellation", "planet": "ArcCorp", "dx": 16, "dy": -10 },
+    { "kind": "crew", "id": "Vanta", "label": "Cmdr", "planet": "Orison (Crusader)", "attachTo": "Crusader", "dx": 0, "dy": 22 }
+  ],
+
+  "meta": {
+    "notes": "Angles in degrees, 0=right, counter-clockwise. Orbit is the ellipse semi-major axis in px (x). Y radius will be orbit*0.5."
+  }
+}

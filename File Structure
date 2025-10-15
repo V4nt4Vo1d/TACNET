@@ -1,0 +1,8 @@
+fleet-atlas/
+├─ index.html          (Stanton System dashboard)
+├─ ships.html          (Fleet roster & loadouts)
+├─ crew.html           (Personnel tracking)
+└─ css/
+   ├─ variables.css    (css variables)
+   ├─ base.css         (layout + components)
+   └─ pages.css        (page-specific tweaks)

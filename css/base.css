@@ -1,0 +1,123 @@
+/* --- reset (tiny) --- */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { font-size: 16px; }
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  color: var(--text);
+  background: radial-gradient(1200px 800px at 70% -10%, #13202a 0%, var(--bg-0) 60%) fixed;
+}
+
+/* subtle starfield + grid */
+body::before, body::after {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none;
+}
+body::before {
+  background:
+    linear-gradient(transparent 31px, var(--grid) 32px),
+    linear-gradient(90deg, transparent 31px, var(--grid) 32px);
+  background-size: 32px 32px, 32px 32px;
+  mask-image: radial-gradient(circle at center, rgba(0,0,0,.35) 0%, rgba(0,0,0,1) 70%);
+}
+body::after {
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.45), transparent 40%),
+    radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,.3), transparent 40%),
+    radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,.2), transparent 40%);
+  opacity: .4;
+}
+
+/* layout */
+.shell { max-width: var(--maxw); margin: 0 auto; padding: 20px; }
+.app {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--g);
+  min-height: 100dvh;
+}
+
+/* nav/sidebar */
+.nav {
+  background: linear-gradient(180deg, #0e1722, var(--bg-1));
+  border: 1px solid rgba(23,231,255,.15);
+  border-radius: var(--radius);
+  box-shadow: var(--glow);
+  padding: 16px;
+  position: sticky; top: 16px; height: calc(100dvh - 32px);
+  display: grid; grid-template-rows: auto 1fr auto; gap: 16px;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  letter-spacing: .15em; text-transform: uppercase; font-weight: 700;
+}
+.brand .delta {
+  width: 22px; height: 22px; display: inline-block;
+  border-left: 2px solid var(--cyan);
+  border-bottom: 2px solid var(--cyan);
+  transform: skewX(-18deg) rotate(-45deg);
+  filter: drop-shadow(0 0 6px rgba(23,231,255,.8));
+}
+.menu a {
+  display: block; padding: 10px 12px; margin-bottom: 6px;
+  color: var(--text); text-decoration: none; border-radius: 8px;
+  border: 1px solid transparent;
+}
+.menu a[aria-current="page"],
+.menu a:hover {
+  border-color: rgba(23,231,255,.25);
+  background: linear-gradient(90deg, rgba(23,231,255,.08), transparent);
+  box-shadow: inset 0 0 0 1px rgba(23,231,255,.12);
+}
+
+/* topbar */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; margin-bottom: var(--g);
+  border: 1px solid rgba(23,231,255,.15);
+  background: #0e1722; border-radius: var(--radius);
+  box-shadow: var(--glow);
+}
+.topbar .crumbs { color: var(--text-dim); font-family: var(--mono); font-size: .9rem; }
+
+/* panels */
+.panel {
+  background: linear-gradient(180deg, #0e1722, #0c131c);
+  border: 1px solid rgba(23,231,255,.15);
+  border-radius: var(--radius);
+  box-shadow: var(--glow);
+  padding: 16px;
+}
+.panel h2 {
+  margin: 0 0 10px; font-size: 1rem; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--cyan);
+}
+
+/* status tags */
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 8px; border-radius: 999px; font-size: .8rem;
+  border: 1px solid rgba(23,231,255,.25); color: var(--cyan);
+}
+
+/* utility */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--g); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--g); }
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .nav { position: relative; height: auto; top: 0; }
+}
+
+/* holo map styling (generic for inline SVGs) */
+.holo {
+  width: 100%; aspect-ratio: 16/9; border-radius: calc(var(--radius) - 2px);
+  background: radial-gradient(120% 120% at 50% -10%, rgba(23,231,255,.06), transparent 60%);
+  border: 1px solid rgba(23,231,255,.18);
+  position: relative; overflow: hidden;
+}
+.holo svg { width: 100%; height: 100%; display: block; }
+.orbit { stroke: rgba(23,231,255,.22); stroke-dasharray: 3 6; fill: none; }
+.planet { fill: rgba(23,231,255,.08); stroke: var(--cyan-600); filter: drop-shadow(0 0 6px rgba(23,231,255,.5)); }
+.node { fill: var(--magenta-600); filter: drop-shadow(0 0 8px rgba(255,59,213,.6)); }
+.legend { position: absolute; bottom: 10px; right: 10px; font-size: .8rem; color: var(--text-dim); }
