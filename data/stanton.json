@@ -14,9 +14,9 @@
   ],
 
   "assets": [
-    { "kind": "ship", "id": "FA-01", "label": "Hammerhead", "planet": "Crusader", "dx": -18, "dy": -12 },
-    { "kind": "ship", "id": "FA-12", "label": "Constellation", "planet": "ArcCorp", "dx": 16, "dy": -10 },
-    { "kind": "crew", "id": "Vanta", "label": "Cmdr", "planet": "Orison (Crusader)", "attachTo": "Crusader", "dx": 0, "dy": 22 }
+    { "kind": "ship", "id": "890jump", "label": "Hammerhead", "planet": "microTech", "dx": -18, "dy": -12 },
+    { "kind": "ship", "id": "FA-12", "label": "Constellation", "planet": "microTech", "dx": 16, "dy": -10 },
+    { "kind": "crew", "id": "Vanta", "label": "Cmdr", "planet": "New Babbage (microTech)", "attachTo": "microTech", "dx": 0, "dy": 22 }
   ],
 
   "meta": {
