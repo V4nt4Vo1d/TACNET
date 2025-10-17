@@ -4,6 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TACNET · Crew</title>
+
+  <style> body { opacity: 0 } .authed body { opacity: 1 } </style>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    (async () => {
+      const here = (new URL(location.href)).pathname.split('/').pop() || 'crew.html';
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { location.replace(`login.html?next=${encodeURIComponent(here)}`); return; }
+      document.documentElement.classList.add('authed');
+    })();
+  </script>
+
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/pages.css">
@@ -13,12 +25,12 @@
     <aside class="nav">
       <div class="brand"><span class="delta"></span> TACNET</div>
       <nav class="menu">
-        <a href="index.html">Command · Stanton</a>
+        <a href="dashboard.html">Command · Stanton</a>
         <a href="ships.html">Ships</a>
         <a href="crew.html" aria-current="page">Crew</a>
       </nav>
       <div class="panel"><h2>Presence</h2>
-        <p class="stat">Online: <strong>2</strong></p>
+        <p class="stat">Online: <strong>9</strong></p>
         <p class="stat">Channels: <strong>Comms, Ops</strong></p>
       </div>
     </aside>
@@ -26,7 +38,10 @@
     <main>
       <div class="topbar">
         <div class="crumbs">/ Personnel / Crew</div>
-        <div class="tag">Δ Beacon</div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="tag">Δ <span id="user-chip">Operator</span></span>
+          <button id="logout-btn" class="btn">Log out</button>
+        </div>
       </div>
 
       <section class="panel">
@@ -34,8 +49,8 @@
         <div class="grid-2">
           <div>
             <div class="roster">
-              <div class="row"><span>Fahxey</span><span class="tag">Captain</span><span class="stat">New Babbage</span></div>
-              <div class="row"><span>VANT∆</span><span class="tag">Commander</span><span class="stat">New Babbage</span></div>
+              <div class="row"><span>Fahexy</span><span class="tag">Captain</span><span class="stat">Area18</span></div>
+              <div class="row"><span>VANTΔ</span><span class="tag">Commander</span><span class="stat">Area18</span></div>
             </div>
           </div>
           <div class="holo" role="img" aria-label="Planet view with pins">
@@ -58,5 +73,21 @@
       </section>
     </main>
   </div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    window.addEventListener('DOMContentLoaded', async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const callsign = user?.user_metadata?.callsign || 'Operator';
+      const chip = document.getElementById('user-chip');
+      if (chip) chip.textContent = callsign;
+
+      const out = document.getElementById('logout-btn');
+      if (out) out.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        location.href = 'index.html';
+      });
+    });
+  </script>
 </body>
 </html>

@@ -25,27 +25,92 @@
         <input class="input" type="text" name="username" placeholder="Callsign (e.g., Vanta)" required>
         <input class="input" type="password" name="password" placeholder="Access Key (demo accepts anything)" required>
         <button class="btn" type="submit">Enter TACNET</button>
-        <p class="muted">Demo mode stores a temp session token in your browser for ~12 hours.</p>
+        <!-- <p class="muted">Demo mode stores a temp session token in your browser for ~12 hours.</p> -->
       </form>
     </div>
   </div>
+  
+<script type="module">
+  import { supabase } from './js/supabase.js';
 
-  <script type="module">
-    import { login, isAuthed } from './js/auth.js';
+  // Canonicalize callsign -> pseudo email (MUST be identical for signup & login)
+  function canonicalEmail(rawCallsign) {
+    const cs = String(rawCallsign || '')
+      .trim()
+      .toLowerCase()
+      // keep letters/numbers/._- ; replace everything else with '-'
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+    return `${cs}@tacnet.local`;
+  }
 
-    const form = document.getElementById('login-form');
-    const next = new URL(location.href).searchParams.get('next') || 'dashboard.html';
+  const form = document.getElementById('login-form');
+  const next = new URL(location.href).searchParams.get('next') || 'dashboard.html';
 
-    if (isAuthed()) location.href = next;
+  // Login/Signup toggle UI
+  const modeSwitch = document.createElement('div');
+  modeSwitch.className = 'muted';
+  modeSwitch.style.marginTop = '8px';
+  modeSwitch.innerHTML = `
+    <label><input type="radio" name="mode" value="login" checked> Login</label>
+    &nbsp;&nbsp;
+    <label><input type="radio" name="mode" value="signup"> Sign up</label>
+  `;
+  form.appendChild(modeSwitch);
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const data = new FormData(form);
-      const username = data.get('username')?.toString().trim();
-      // In demo: accept any password. Replace with server call later.
-      login({ username });
+  const err = document.createElement('p');
+  err.className = 'muted';
+  err.style.color = '#ff9fbf';
+  form.appendChild(err);
+
+  // If already signed in → go to next
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) location.href = next;
+  } catch (e) {
+    console.error('SUPABASE SESSION ERROR', e);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    err.textContent = '';
+
+    const data = new FormData(form);
+    const callsignInput = (data.get('username') || '').toString();
+    const password = (data.get('password') || '').toString();
+    const mode = (data.get('mode') || 'login').toString();
+
+    const email = canonicalEmail(callsignInput);
+
+    if (!email || !password) {
+      err.textContent = 'Enter callsign and password.';
+      return;
+    }
+
+    try {
+      if (mode === 'signup') {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,              // do NOT trim; passwords are exact
+          options: { data: { callsign: callsignInput.trim() } }
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password               
+        });
+        if (error) throw error;
+      }
       location.href = next;
-    });
-  </script>
+    } catch (e2) {
+      console.error('SUPABASE AUTH ERROR', e2);
+      err.textContent = e2.message || 'Authentication failed.';
+    }
+  });
+</script>
+
+
 </body>
 </html>
