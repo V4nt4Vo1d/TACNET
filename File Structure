@@ -1,8 +1,15 @@
 fleet-atlas/
-├─ index.html          (Stanton System dashboard)
+├─ index.html          (Moved to basic homepage)
+├─ login.html          (Added login page to filter access to development access)
 ├─ ships.html          (Fleet roster & loadouts)
 ├─ crew.html           (Personnel tracking)
 └─ css/
    ├─ variables.css    (css variables)
    ├─ base.css         (layout + components)
    └─ pages.css        (page-specific tweaks)
+└─ js/
+   ├─ app.js           (Main app javascript)
+   └─ auth.js          (New authentication javascript)
+└─ data/
+   ├─ stanton.json     (stanton system data)
+   └─ pyro.json        (pyro system data)

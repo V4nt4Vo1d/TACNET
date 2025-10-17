@@ -1,73 +1,51 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TACNET · Stanton</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>TACNET · Home</title>
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/pages.css">
+  <style>
+    .hero { display:grid; gap:16px; place-items:center; text-align:center; padding:10vh 16px; }
+    .hero h1 { font-size: clamp(2rem, 4vw, 3rem); letter-spacing:.12em; text-transform:uppercase; color: var(--cyan); margin:0; }
+    .hero p { max-width: 720px; color: var(--text-dim); }
+    .cta { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+    .cta .btn { font-size:1rem; padding:12px 16px; }
+    .features { max-width: var(--maxw); margin: 32px auto; padding: 0 16px; display:grid; gap:12px; }
+    .features .panel p { color: var(--text-dim); margin:.25rem 0 0; }
+  </style>
 </head>
 <body>
-  <div class="shell app"> <!-- Main container for the application -->
-    <aside class="nav">
-      <div class="brand"><span class="delta"></span> TACNET</div>
-      <nav class="menu">
-        <a href="index.html" aria-current="page">Command · Stanton</a>
-        <a href="ships.html">Ships</a>
-        <a href="crew.html">Crew</a>
-      </nav>
-      <div class="panel"><!-- Panel for displaying info -->
-        <h2>Intel</h2>
-        <div class="stat">System: <strong>Stanton</strong></div>
-        <div class="stat">Ops Online: <strong>0</strong></div>
-        <div class="stat">Jump Gate: <strong>Pyro link unstable</strong></div>
+  <div class="shell">
+    <header class="topbar">
+      <div class="crumbs">/ TACNET</div>
+      <div class="tag">Δ Private Access</div>
+    </header>
+
+    <section class="hero">
+      <h1>TACNET</h1>
+      <p>A multiplayer command interface for Star Citizen: system-level fleet orchestration, planet view deployment, and tactical grids—rendered as a holo UI.</p>
+      <div class="cta">
+        <a class="btn" href="login.html">Log In</a>
       </div>
-    </aside>
+    </section>
 
-    <main>
-      <div class="topbar">
-        <div class="crumbs">/ Systems / Stanton</div>
-        <div class="tag">Δ Secure Link</div>
+    <!-- <section class="features">
+      <div class="panel">
+        <h2>Live Holochart</h2>
+        <p>JSON-driven system maps (Stanton now; Pyro next), jump points, and tracked assets.</p>
       </div>
-
-      <div class="grid-3">
-        <section class="panel" style="grid-column: 1 / -1;">
-          <h2>Holochart · Stanton</h2>
-          <div class="map-toolbar">
-            <a class="btn" data-view="system" href="#">System</a>
-            <a class="btn" data-view="planet" href="#">Planet</a>
-            <a class="btn" data-view="tactical" href="#">Tactical</a>
-            <span class="stat">Tracking: <strong>Ships 14</strong> · <strong>Crew 2</strong></span>
-          </div>
-          <!-- Simple map view -->
-          <div class="holo" role="img" aria-label="Holographic map of the Stanton system">
-            <svg id="holo-svg" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid meet"></svg>
-            <div class="legend">• magenta = tracked asset · cyan = world/orbit</div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <h2>Active Ops</h2>
-          <div class="roster"><!-- Active operations-->
-            <div class="row"><span>Mining: Pure Carinite</span><span class="tag" style="color:var(--warn);border-color:rgba(255,209,102,.4)">Caution</span><span class="stat">Yield 0%</span></div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <h2>Comms</h2>
-          <p class="stat">Last ping: <strong>New Babbage</strong> · 00:00 UTC</p>
-          <p class="stat">Fleet status: <strong>Nominal</strong></p>
-        </section>
-
-        <section class="panel">
-          <h2>Shipyard</h2>
-          <p class="stat">Refit queue: <strong>11</strong> · Drydock: <strong>New Babbage</strong></p>
-          <p class="stat">Δ Blueprint sync out-of-date</p>
-        </section>
+      <div class="panel">
+        <h2>Views</h2>
+        <p>Switch between System, Planet, and Tactical</p>
       </div>
-    </main>
+      <div class="panel">
+        <h2>Extensible</h2>
+        <p>Clean data model, tiny SVG renderer, and a friendly CSS token system.</p>
+      </div>
+    </section> -->
   </div>
-<script type="module" src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TACNET · Dashboard</title>
+
+  <!-- Prevent content flash until auth is verified -->
+  <style>
+    /* hide body until we confirm auth */
+    body { opacity: 0; }
+    .authed body { opacity: 1; }
+  </style>
+
+  <!-- Hard gate: no modules needed, runs instantly -->
+  <script>
+    (function () {
+      var NEXT = 'dashboard.html'; // set this per page (ships.html, crew.html, etc.)
+      try {
+        var raw = localStorage.getItem('tacnet.auth');
+        if (!raw) throw new Error('no token');
+        var obj = JSON.parse(raw);
+        if (!obj.token) throw new Error('no token');
+        if (obj.exp && Date.now() > obj.exp) {
+          localStorage.removeItem('tacnet.auth');
+          throw new Error('expired');
+        }
+        // Mark authed → reveal body via CSS
+        document.documentElement.classList.add('authed');
+      } catch (e) {
+        location.replace('login.html?next=' + encodeURIComponent(NEXT));
+      }
+    })();
+  </script>
+
+  <!-- your existing CSS links go below -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="shell app"> <!-- Main container for the application -->
+    <aside class="nav">
+      <div class="brand"><span class="delta"></span> TACNET</div>
+      <nav class="menu">
+        <a href="index.html" aria-current="page">Command · Stanton</a>
+        <a href="ships.html">Ships</a>
+        <a href="crew.html">Crew</a>
+        <a href="login.html">Login</a>
+      </nav>
+
+      <div class="topbar">
+  <div class="crumbs">/ Systems / Stanton</div>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <span class="tag">Δ <span id="user-chip">Operator</span></span>
+    <button id="logout-btn" class="btn">Log out</button>
+  </div>
+</div>
+
+
+      <div class="panel"><!-- Panel for displaying info -->
+        <h2>Intel</h2>
+        <div class="stat">System: <strong>Stanton</strong></div>
+        <div class="stat">Ops Online: <strong>0</strong></div>
+        <div class="stat">Jump Gate: <strong>Pyro link unstable</strong></div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="crumbs">/ Systems / Stanton</div>
+        <div class="tag">Δ Secure Link</div>
+      </div>
+
+      <div class="grid-3">
+        <section class="panel" style="grid-column: 1 / -1;">
+          <h2>Holochart · Stanton</h2>
+          <div class="map-toolbar">
+            <a class="btn" data-view="system" href="#">System</a>
+            <a class="btn" data-view="planet" href="#">Planet</a>
+            <a class="btn" data-view="tactical" href="#">Tactical</a>
+            <span class="stat">Tracking: <strong>Ships 14</strong> · <strong>Crew 2</strong></span>
+          </div>
+          <!-- Simple map view -->
+          <div class="holo" role="img" aria-label="Holographic map of the Stanton system">
+            <svg id="holo-svg" viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="legend">• magenta = tracked asset · cyan = world/orbit</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Active Ops</h2>
+          <div class="roster"><!-- Active operations-->
+            <div class="row"><span>Mining: Pure Carinite</span><span class="tag" style="color:var(--warn);border-color:rgba(255,209,102,.4)">Caution</span><span class="stat">Yield 0%</span></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Comms</h2>
+          <p class="stat">Last ping: <strong>New Babbage</strong> · 00:00 UTC</p>
+          <p class="stat">Fleet status: <strong>Nominal</strong></p>
+        </section>
+
+        <section class="panel">
+          <h2>Shipyard</h2>
+          <p class="stat">Refit queue: <strong>11</strong> · Drydock: <strong>New Babbage</strong></p>
+          <p class="stat">Δ Blueprint sync out-of-date</p>
+        </section>
+      </div>
+    </main>
+  </div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
