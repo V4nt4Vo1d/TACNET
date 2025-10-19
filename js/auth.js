@@ -1,4 +1,5 @@
 const AUTH_KEY = 'tacnet.auth';
+
 export function isAuthed() {
   try {
     const raw = localStorage.getItem(AUTH_KEY);

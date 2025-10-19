@@ -29,3 +29,119 @@
   outline: 1px solid rgba(23,231,255,.35);
   box-shadow: 0 0 12px rgba(23,231,255,.25) inset;
 }
+
+/* Badges */
+.badge {
+  font: 600 12px/1 var(--mono);
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(23,231,255,.25);
+  letter-spacing: .08em;
+  opacity: .9;
+}
+.badge-offline { color:#ffc2d6; border-color:rgba(255,99,132,.35); }
+.badge-standby { color:#ffe0a6; border-color:rgba(255,193,7,.35); }
+.badge-soon    { color:#a9f6ff; border-color:rgba(23,231,255,.35); }
+
+/* Panel title layout */
+.panel-title {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px;
+}
+
+/* Pills + lists */
+.pill {
+  display:inline-block;
+  padding:4px 8px;
+  border:1px dashed rgba(23,231,255,.25);
+  border-radius:8px;
+  margin-right:8px;
+}
+.offline-list {
+  display:grid; gap:10px; margin:12px 0 8px; padding:0; list-style:none;
+}
+.offline-list li {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; padding:8px 10px;
+  background:rgba(23,231,255,.04);
+  border:1px solid rgba(23,231,255,.12);
+  border-radius:10px;
+}
+
+/* Skeleton shimmer */
+.skeleton { position:relative; overflow:hidden; }
+.skeleton::after {
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.6s infinite linear;
+}
+.skeleton-line {
+  height:10px; margin:6px 0; border-radius:6px;
+  background: rgba(255,255,255,.06);
+}
+@keyframes shimmer {
+  to { transform: translateX(100%); }
+}
+
+/* Feed */
+.feed { display:grid; gap:10px; }
+.feed-item { display:flex; gap:10px; align-items:flex-start; }
+.feed-tag {
+  font: 700 12px/1 var(--mono);
+  padding:6px 8px; border-radius:6px;
+  border:1px solid rgba(23,231,255,.22);
+  color:#b6fbff;
+}
+.feed-title { font-weight:600; letter-spacing:.02em; }
+.feed-meta { font-size:.9rem; }
+
+/* Shelf buttons */
+.shelf { margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; }
+.btn-ghost {
+  background: transparent;
+  border:1px dashed rgba(23,231,255,.22);
+}
+.btn[disabled], .btn-ghost[disabled] {
+  cursor:not-allowed; opacity:.6;
+}
+
+/* Hangar cards */
+/* .hangar-grid {
+  display:grid; gap:12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+  margin: 10px 0 4px;
+}
+.hangar-card {
+  padding:12px; border:1px solid rgba(23,231,255,.12); border-radius:12px;
+  background: rgba(23,231,255,.04);
+  display:grid; justify-items:center; gap:8px;
+}
+.hull-silhouette {
+  --silw: 76%; --silh: 32%;
+  width: var(--silw); height: 0; padding-bottom: var(--silh);
+  border-radius: 50% 8% / 40% 60%;
+  border: 2px solid rgba(23,231,255,.22);
+  box-shadow: 0 0 0 1px rgba(23,231,255,.08) inset;
+  filter: drop-shadow(0 0 8px rgba(23,231,255,.08));
+}
+.eta { font: 600 12px/1 var(--mono); color:#a9f6ff; } */
+
+/* Remove the big oval placeholders in Hangar cards */
+.hangar-card .hull-silhouette { display: none; }
+.hangar-card { padding-top: 16px; } /* tighten spacing after removal */
+
+
+/* Hangar pictures */
+.hull-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(23,231,255,.12);
+  box-shadow: 0 0 0 1px rgba(23,231,255,.08) inset;
+  display: block;
+  margin-bottom: 8px;
+}
+/* kill the placeholder ovals if any remain */
+.hull-silhouette { display: none; }

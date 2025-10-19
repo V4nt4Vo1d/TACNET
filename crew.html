@@ -5,16 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TACNET · Crew</title>
 
-  <style> body { opacity: 0 } .authed body { opacity: 1 } </style>
   <script type="module">
-    import { supabase } from './js/supabase.js';
-    (async () => {
-      const here = (new URL(location.href)).pathname.split('/').pop() || 'crew.html';
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { location.replace(`login.html?next=${encodeURIComponent(here)}`); return; }
-      document.documentElement.classList.add('authed');
-    })();
-  </script>
+  import { supabase } from './js/supabase.js';
+  (async () => {
+    const here = (new URL(location.href)).pathname.split('/').pop() || 'dashboard.html';
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { location.replace(`login.html?next=${encodeURIComponent(here)}`); return; }
+    document.documentElement.classList.add('authed'); // <-- reveals the page
+  })();
+</script>
 
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/base.css">
@@ -30,7 +29,7 @@
         <a href="crew.html" aria-current="page">Crew</a>
       </nav>
       <div class="panel"><h2>Presence</h2>
-        <p class="stat">Online: <strong>9</strong></p>
+        <p class="stat">Online: <strong>0</strong></p>
         <p class="stat">Channels: <strong>Comms, Ops</strong></p>
       </div>
     </aside>
@@ -66,7 +65,7 @@
               <circle class="node" cx="510" cy="290" r="6"/>
               <circle class="node" cx="360" cy="380" r="6"/>
               <circle class="node" cx="470" cy="420" r="6"/>
-              <text x="380" y="540" fill="#a9f6ff" font-size="14" font-family="var(--mono)">ORISON SURFACE GRID</text>
+              <text x="380" y="540" fill="#a9f6ff" font-size="14" font-family="var(--mono)">Area18 SURFACE GRID</text>
             </svg>
           </div>
         </div>
@@ -74,20 +73,33 @@
     </main>
   </div>
 
-  <script type="module">
-    import { supabase } from './js/supabase.js';
-    window.addEventListener('DOMContentLoaded', async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const callsign = user?.user_metadata?.callsign || 'Operator';
-      const chip = document.getElementById('user-chip');
-      if (chip) chip.textContent = callsign;
+<script type="module">
+  import { supabase } from './js/supabase.js';
 
-      const out = document.getElementById('logout-btn');
-      if (out) out.addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        location.href = 'index.html';
-      });
-    });
-  </script>
+  function displayNameFor(callsign) {
+    if (!callsign) return 'Operator';
+    const cs = callsign.toString().trim().toLowerCase();
+    return cs === 'vanta' ? 'VANTΔ' : callsign;
+  }
+
+  const chip = document.getElementById('user-chip');
+  const statusEl = document.getElementById('auth-status');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  (async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const callsign = user?.user_metadata?.callsign || 'Operator';
+
+    if (chip) chip.textContent = displayNameFor(callsign);
+    if (statusEl) statusEl.textContent = `Signed in as ${displayNameFor(callsign)}`;
+  })().catch(console.error);
+
+  logoutBtn?.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    location.href = 'login.html';
+  });
+</script>
+
+
 </body>
 </html>

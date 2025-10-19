@@ -5,17 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TACNET · Dashboard</title>
 
-  <!-- hide until session confirmed -->
-  <style> body { opacity: 0 } .authed body { opacity: 1 } </style>
   <script type="module">
-    import { supabase } from './js/supabase.js';
-    (async () => {
-      const here = (new URL(location.href)).pathname.split('/').pop() || 'dashboard.html';
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { location.replace(`login.html?next=${encodeURIComponent(here)}`); return; }
-      document.documentElement.classList.add('authed');
-    })();
-  </script>
+  import { supabase } from './js/supabase.js';
+  (async () => {
+    const here = (new URL(location.href)).pathname.split('/').pop() || 'dashboard.html';
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { location.replace(`login.html?next=${encodeURIComponent(here)}`); return; }
+    document.documentElement.classList.add('authed'); // <-- reveals the page
+  })();
+</script>
+
 
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/base.css">
@@ -36,8 +35,10 @@
       <div class="panel">
         <h2>Intel</h2>
         <div class="stat">System: <strong>Stanton</strong></div>
-        <div class="stat">Ops Online: <strong>7</strong></div>
-        <div class="stat">Jump Gate: <strong>Pyro link unstable</strong></div>
+        <div class="stat">Ops Online: <strong>0</strong></div>
+        <div class="stat">Jump Gate: <strong>Pyro link stable</strong></div>
+        <div class="stat">Jump Gate: <strong>Nyx link unstable</strong></div>
+
       </div>
     </aside>
 
@@ -46,7 +47,9 @@
         <div class="crumbs">/ Systems / Stanton</div>
         <div style="display:flex; gap:8px; align-items:center;">
           <span class="tag">Δ <span id="user-chip">Operator</span></span>
-          <button id="logout-btn" class="btn">Log out</button>
+          <div id="auth-status" class="muted" style="margin: 8px 0;"></div>
+          <button id="logout-btn" class="btn">Sign out</button>
+
         </div>
       </div>
 
@@ -57,7 +60,7 @@
             <a class="btn" data-view="system" href="#">System</a>
             <a class="btn" data-view="planet" href="#">Planet</a>
             <a class="btn" data-view="tactical" href="#">Tactical</a>
-            <span class="stat">Tracking: <strong>Ships 12</strong> · <strong>Crew 35</strong></span>
+            <span class="stat">Tracking: <strong>Ships 15</strong> · <strong>Crew 2</strong></span>
             <span class="stat" id="view-status"></span>
           </div>
           <div class="holo" role="img" aria-label="Holographic map of the Stanton system">
@@ -66,48 +69,541 @@
           </div>
         </section>
 
-        <section class="panel">
-          <h2>Active Ops</h2>
-          <div class="roster">
-            <div class="row"><span>Convoy: HUR-L1 → ARCCORP</span><span class="tag">In Transit</span><span class="stat">ETA 12m</span></div>
-            <div class="row"><span>Patrol: CRU-L4 Ring</span><span class="tag">Green</span><span class="stat">T+31m</span></div>
-            <div class="row"><span>Mining: Shubin Claim</span><span class="tag" style="color:var(--warn);border-color:rgba(255,209,102,.4)">Caution</span><span class="stat">Yield 78%</span></div>
-          </div>
+        <section class="panel" id="ops-panel">
+          <header class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <h2 style="margin:0;">Operations</h2>
+            <span class="badge">LIVE</span>
+          </header>
+          <ul id="ops-list" class="offline-list" style="margin-top:8px;"></ul>
+          <form id="op-form" style="display:none; gap:8px; margin-top:10px;">
+          <input class="input" name="title" placeholder="Op title (e.g., Escort CRU-L1 → ARC)" required>
+          <select class="input" name="status">
+            <option>planned</option><option>active</option><option>paused</option><option>completed</option>
+          </select>
+          <input class="input" name="eta" type="datetime-local" placeholder="ETA (optional)">
+          <button class="btn" type="submit">Add Op</button>
+          <span id="op-form-msg" class="muted"></span>
+        </form>
         </section>
 
-        <section class="panel">
-          <h2>Comms</h2>
-          <p class="stat">Last ping: <strong>CRU-L1 Relay</strong> · 00:42 UTC</p>
-          <p class="stat">Fleet status: <strong>Nominal</strong></p>
+        <section class="panel" id="comms-panel">
+          <header class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <h2 style="margin:0;">Comms</h2>
+            <span class="badge">LIVE</span>
+          </header>
+          <div id="comms-feed" class="feed" style="margin-top:8px;"></div>
+        </section>
+        <section class="panel" id="hangar-panel">
+          <header class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <h2 style="margin:0;">Hangar</h2>
+            <span class="badge">LIVE</span>
+          </header>
+          <div id="hangar-grid" class="hangar-grid" style="margin-top:8px;"></div>
+          <form id="hull-form" style="display:none; gap:8px; margin-top:10px;">
+          <input class="input" name="label" placeholder="Ship name (e.g., Cutlass Black)" required>
+          <input class="input" name="class" placeholder="Class (e.g., Medium Fighter)">
+          <select class="input" name="status">
+            <option>docked</option><option>maintenance</option><option>deployed</option>
+          </select>
+          <input class="input" name="image_url" placeholder="Optional image URL">
+          <button class="btn" type="submit">Add Ship</button>
+          <span id="hull-form-msg" class="muted"></span>
+        </form>
         </section>
 
-        <section class="panel">
-          <h2>Shipyard</h2>
-          <p class="stat">Refit queue: <strong>3</strong> · Drydock: <strong>Orison</strong></p>
-          <p class="stat">Δ Blueprint sync up-to-date</p>
-        </section>
+
       </div>
     </main>
   </div>
 
-  <!-- user chip + logout wiring -->
-  <script type="module">
-    import { supabase } from './js/supabase.js';
-    window.addEventListener('DOMContentLoaded', async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const callsign = user?.user_metadata?.callsign || 'Operator';
-      const chip = document.getElementById('user-chip');
-      if (chip) chip.textContent = callsign;
-
-      const out = document.getElementById('logout-btn');
-      if (out) out.addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        location.href = 'index.html';
-      });
-    });
-  </script>
-
+  
   <!-- holo renderer -->
   <script src="js/app.js"></script>
+
+  <!-- auth guard + status
+  <script type="module">
+  import { supabase } from './js/supabase.js';
+
+  function displayNameFor(callsign) {
+  if (!callsign) return 'Operator';
+  const cs = callsign.toString().trim().toLowerCase();
+  return cs === 'vanta' ? 'VANTΔ' : callsign; // keep others as-is
+}
+
+  const statusEl = document.getElementById('auth-status');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  async function guardAndShowUser() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      location.href = 'login.html?next=' + encodeURIComponent(location.pathname.split('/').pop() || 'dashboard.html');
+      return;
+    }
+    const callsign = session.user?.user_metadata?.callsign || 'Unknown';
+    statusEl.textContent = `Signed in as ${displayNameFor(callsign)}`;
+
+  }
+
+  logoutBtn.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    location.href = 'login.html';
+  });
+
+  guardAndShowUser();
+</script>
+
+<script type="module">
+  import { supabase } from './js/supabase.js';
+
+    (async () => {
+    const { data, error } = await supabase.auth.getUser();
+    console.log('user:', data?.user);
+  })();
+
+  const opsList   = document.getElementById('ops-list');
+  const commsFeed = document.getElementById('comms-feed');
+  const hangar    = document.getElementById('hangar-grid');
+
+  await Promise.all([loadOps(), loadComms(), loadHangar()]);
+
+  setInterval(loadOps,   15000);
+  setInterval(loadComms, 12000);
+  setInterval(loadHangar, 20000);
+
+  async function loadOps() {
+    const { data, error } = await supabase
+      .from('ops')
+      .select('*')
+      .order('priority', { ascending: true })
+      .order('eta', { ascending: true, nullsFirst: true })
+      .limit(20);
+    if (error) return console.warn('ops load error', error);
+    renderOps(data || []);
+  }
+
+  async function loadComms() {
+    const { data, error } = await supabase
+      .from('comms')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) return console.warn('comms load error', error);
+    renderComms(data || []);
+  }
+
+  async function loadHangar() {
+    const { data, error } = await supabase
+      .from('hulls')
+      .select('*')
+      .order('label', { ascending: true })
+      .limit(50);
+    if (error) return console.warn('hangar load error', error);
+    renderHangar(data || []);
+  }
+
+  function renderOps(rows) {
+    opsList.innerHTML = '';
+    if (!rows.length) { opsList.innerHTML = `<li class="muted">No operations yet.</li>`; return; }
+    rows.forEach(op => {
+      const li = document.createElement('li');
+      li.style.display = 'flex';
+      li.style.alignItems = 'center';
+      li.style.justifyContent = 'space-between';
+      li.style.gap = '10px';
+      li.style.padding = '8px 10px';
+      li.style.background = 'rgba(23,231,255,.04)';
+      li.style.border = '1px solid rgba(23,231,255,.12)';
+      li.style.borderRadius = '10px';
+      li.innerHTML = `
+        <span class="pill">${escapeHtml(op.title)}</span>
+        <span class="muted">${escapeHtml((op.status||'').toUpperCase())}</span>
+        <span class="eta">${formatEta(op.eta)}</span>
+      `;
+      opsList.appendChild(li);
+    });
+  }
+
+  function renderComms(rows) {
+    commsFeed.innerHTML = '';
+    if (!rows.length) { commsFeed.innerHTML = `<div class="muted">No messages yet.</div>`; return; }
+    rows.forEach(msg => {
+      const item = document.createElement('div');
+      item.className = 'feed-item';
+      item.style.display = 'flex';
+      item.style.gap = '10px';
+      item.style.alignItems = 'flex-start';
+      item.innerHTML = `
+        <span class="feed-tag">${escapeHtml(msg.channel || 'SYS')}</span>
+        <div class="feed-body">
+          <div class="feed-title">${escapeHtml(msg.body)}</div>
+          <div class="feed-meta muted">${timeSince(msg.created_at)} · ${escapeHtml(msg.author_callsign || 'system')}</div>
+        </div>`;
+      commsFeed.appendChild(item);
+    });
+  }
+
+  function renderHangar(rows) {
+    hangar.innerHTML = '';
+    if (!rows.length) { hangar.innerHTML = `<div class="muted">No hulls registered.</div>`; return; }
+    rows.forEach(h => {
+      const card = document.createElement('div');
+      card.className = 'hangar-card';
+      card.style.padding = '12px';
+      card.style.border = '1px solid rgba(23,231,255,.12)';
+      card.style.borderRadius = '12px';
+      card.style.background = 'rgba(23,231,255,.04)';
+      card.style.display = 'grid';
+      card.style.justifyItems = 'center';
+      card.style.gap = '8px';
+      card.innerHTML = `
+        <div class="hull-silhouette" style="--silw:76%;--silh:32%;width:76%;height:0;padding-bottom:32%;border-radius:50% 8% / 40% 60%;border:2px solid rgba(23,231,255,.22);box-shadow:0 0 0 1px rgba(23,231,255,.08) inset;filter:drop-shadow(0 0 8px rgba(23,231,255,.08));"></div>
+        <div><strong>${escapeHtml(h.label)}</strong></div>
+        <div class="muted">${escapeHtml(h.class || '')}</div>
+        <div class="muted">Status: ${escapeHtml(h.status || '')}</div>
+      `;
+      hangar.appendChild(card);
+    });
+  }
+
+  function escapeHtml(s=''){ return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function formatEta(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    if (isNaN(+d)) return '—';
+    return 'ETA ' + new Intl.DateTimeFormat(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }).format(d);
+  }
+  function timeSince(ts) {
+    const ms = Date.now() - new Date(ts).getTime();
+    const m = Math.floor(ms/60000); if (m < 1) return 'just now';
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m/60); if (h < 24) return `${h}h ago`;
+    const d = Math.floor(h/24); return `${d}d ago`;
+  }
+
+  const OWNER_EMAIL = 'v4nt4vo1d@gmail.com';
+
+  // Eventually switch to user id:
+  // const OWNER_UID = '00000000-0000-0000-0000-000000000000';
+
+  (async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const isOwner = !!user && (user.email === OWNER_EMAIL /* || user.id === OWNER_UID */);
+
+    if (isOwner) {
+      document.getElementById('op-form').style.display   = 'grid';
+      document.getElementById('hull-form').style.display = 'grid';
+    } else {
+      // keep read-only;
+      // document.getElementById('op-form').insertAdjacentHTML('beforebegin', '<p class="muted">Read-only</p>');
+    }
+  })().catch(err => console.error('owner-check error', err));
+
+// Create Op
+document.getElementById('op-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.currentTarget);
+  const title = f.get('title')?.toString().trim();
+  const status = f.get('status')?.toString();
+  const etaStr = f.get('eta')?.toString();
+  const eta = etaStr ? new Date(etaStr).toISOString() : null;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const { error } = await supabase.from('ops').insert({
+    title, status, eta, created_by: user?.id || null
+  });
+  document.getElementById('op-form-msg').textContent = error ? error.message : 'Added ✓';
+  if (!error) e.currentTarget.reset();
+});
+
+// Create Hull
+document.getElementById('hull-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.currentTarget);
+  const label = f.get('label')?.toString().trim();
+  const klass = f.get('class')?.toString().trim() || null;
+  const status = f.get('status')?.toString();
+  const image_url = f.get('image_url')?.toString().trim() || null;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const { error } = await supabase.from('hulls').insert({
+    label, class: klass, status, image_url, created_by: user?.id || null
+  });
+  document.getElementById('hull-form-msg').textContent = error ? error.message : 'Added ✓';
+  if (!error) e.currentTarget.reset();
+});
+
+function renderOps(rows) {
+  opsList.innerHTML = '';
+  if (!rows.length) { opsList.innerHTML = `<li class="muted">No operations yet.</li>`; return; }
+
+  rows.forEach(op => {
+    const li = document.createElement('li');
+    li.className = 'op-row';
+    li.innerHTML = `
+      <span class="pill">${escapeHtml(op.title)}</span>
+      <span class="muted">${escapeHtml((op.status||'').toUpperCase())}</span>
+      <span class="eta">${formatEta(op.eta)}</span>
+    `;
+    // quick action: cycle status on click (auth required)
+    li.addEventListener('click', async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return; // view-only for anonymous
+      const order = ['planned','active','paused','completed'];
+      const next = order[(order.indexOf(op.status||'planned') + 1) % order.length];
+      await supabase.from('ops').update({ status: next }).eq('id', op.id);
+      loadOps();
+    });
+    opsList.appendChild(li);
+  });
+}
+
+</script> -->
+
+<script type="module">
+  import { supabase } from './js/supabase.js';
+
+  // ---------------------------
+  // Helpers
+  // ---------------------------
+  const OWNER_EMAIL = 'v4nt4vo1d@gmail.com';
+
+  function displayNameFor(callsign) {
+    if (!callsign) return 'Operator';
+    const cs = String(callsign).trim().toLowerCase();
+    return cs === 'vanta' ? 'VANTΔ' : callsign;
+  }
+  function escapeHtml(s=''){ return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function formatEta(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts); if (isNaN(+d)) return '—';
+    return 'ETA ' + new Intl.DateTimeFormat(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }).format(d);
+  }
+  function timeSince(ts) {
+    const ms = Date.now() - new Date(ts).getTime();
+    const m = Math.floor(ms/60000); if (m < 1) return 'just now';
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m/60); if (h < 24) return `${h}h ago`;
+    const d = Math.floor(h/24); return `${d}d ago`;
+  }
+
+  // ---------------------------
+  // Auth UI (chip + status + logout) & owner check
+  // ---------------------------
+  const chip      = document.getElementById('user-chip');
+  const statusEl  = document.getElementById('auth-status');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  async function initAuthUi() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      // safety: if someone landed here without the <head> guard catching it
+      location.href = 'login.html?next=' + encodeURIComponent(location.pathname.split('/').pop() || 'dashboard.html');
+      return { user: null, isOwner: false };
+    }
+    const user = session.user;
+    const callsign = user?.user_metadata?.callsign || 'Operator';
+    if (chip)     chip.textContent     = displayNameFor(callsign);
+    if (statusEl) statusEl.textContent = `Signed in as ${displayNameFor(callsign)}`;
+
+    logoutBtn?.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      location.href = 'login.html';
+    });
+
+    const isOwner = !!user && (user.email === OWNER_EMAIL);
+    // Unhide the admin forms for owner
+    if (isOwner) {
+      document.getElementById('op-form')?.style && (document.getElementById('op-form').style.display   = 'grid');
+      document.getElementById('hull-form')?.style && (document.getElementById('hull-form').style.display = 'grid');
+    }
+    return { user, isOwner };
+  }
+
+  // ---------------------------
+  // DOM targets
+  // ---------------------------
+  const opsList   = document.getElementById('ops-list');
+  const commsFeed = document.getElementById('comms-feed');
+  const hangar    = document.getElementById('hangar-grid');
+
+  // optional inline error surfaces (add <p id="ops-err">… if you want)
+  const opsErr   = document.getElementById('ops-err');
+  const commsErr = document.getElementById('comms-err');
+  const hangErr  = document.getElementById('hangar-err');
+
+  // ---------------------------
+  // Loaders (single definitions — no duplicates!)
+  // ---------------------------
+  async function loadOps() {
+    const { data, error } = await supabase
+      .from('ops')
+      .select('*')
+      .order('priority', { ascending: true })
+      .order('eta', { ascending: true, nullsFirst: true })
+      .limit(20);
+    if (error) { opsErr && (opsErr.textContent = error.message); return; }
+    opsErr && (opsErr.textContent = ''); renderOps(data || []);
+  }
+
+  async function loadComms() {
+    const { data, error } = await supabase
+      .from('comms')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) { commsErr && (commsErr.textContent = error.message); return; }
+    commsErr && (commsErr.textContent = ''); renderComms(data || []);
+  }
+
+  async function loadHangar() {
+    const { data, error } = await supabase
+      .from('hulls')
+      .select('*')
+      .order('label', { ascending: true })
+      .limit(50);
+    if (error) { hangErr && (hangErr.textContent = error.message); return; }
+    hangErr && (hangErr.textContent = ''); renderHangar(data || []);
+  }
+
+  // ---------------------------
+  // Renderers (no duplicates; Hangar prefers image_url)
+  // ---------------------------
+  function renderOps(rows) {
+    opsList.innerHTML = '';
+    if (!rows.length) { opsList.innerHTML = `<li class="muted">No operations yet.</li>`; return; }
+    rows.forEach(op => {
+      const li = document.createElement('li');
+      li.className = 'op-row';
+      li.style.display = 'flex';
+      li.style.alignItems = 'center';
+      li.style.justifyContent = 'space-between';
+      li.style.gap = '10px';
+      li.style.padding = '8px 10px';
+      li.style.background = 'rgba(23,231,255,.04)';
+      li.style.border = '1px solid rgba(23,231,255,.12)';
+      li.style.borderRadius = '10px';
+      li.innerHTML = `
+        <span class="pill">${escapeHtml(op.title)}</span>
+        <span class="muted">${escapeHtml((op.status||'').toUpperCase())}</span>
+        <span class="eta">${formatEta(op.eta)}</span>
+      `;
+      // Optional quick action: cycle status on click (owner only)
+      li.addEventListener('click', async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email !== OWNER_EMAIL) return; // read-only for others
+        const order = ['planned','active','paused','completed'];
+        const next = order[(order.indexOf(op.status||'planned') + 1) % order.length];
+        await supabase.from('ops').update({ status: next }).eq('id', op.id);
+        loadOps();
+      });
+      opsList.appendChild(li);
+    });
+  }
+
+  function renderComms(rows) {
+    commsFeed.innerHTML = '';
+    if (!rows.length) { commsFeed.innerHTML = `<div class="muted">No messages yet.</div>`; return; }
+    rows.forEach(msg => {
+      const item = document.createElement('div');
+      item.className = 'feed-item';
+      item.style.display = 'flex';
+      item.style.gap = '10px';
+      item.style.alignItems = 'flex-start';
+      item.innerHTML = `
+        <span class="feed-tag">${escapeHtml(msg.channel || 'SYS')}</span>
+        <div class="feed-body">
+          <div class="feed-title">${escapeHtml(msg.body)}</div>
+          <div class="feed-meta muted">${timeSince(msg.created_at)} · ${escapeHtml(msg.author_callsign || 'system')}</div>
+        </div>`;
+      commsFeed.appendChild(item);
+    });
+  }
+
+  function renderHangar(rows) {
+    hangar.innerHTML = '';
+    if (!rows.length) { hangar.innerHTML = `<div class="muted">No hulls registered.</div>`; return; }
+    rows.forEach(h => {
+      const card = document.createElement('div');
+      card.className = 'hangar-card';
+      card.style.padding = '12px';
+      card.style.border = '1px solid rgba(23,231,255,.12)';
+      card.style.borderRadius = '12px';
+      card.style.background = 'rgba(23,231,255,.04)';
+      card.style.display = 'grid';
+      card.style.justifyItems = 'center';
+      card.style.gap = '8px';
+      card.innerHTML = `
+        ${h.image_url ? `<img class="hull-img" src="${escapeHtml(h.image_url)}" alt="${escapeHtml(h.label)}" />` : ``}
+        <div><strong>${escapeHtml(h.label)}</strong></div>
+        <div class="muted">${escapeHtml(h.class || '')}</div>
+        <div class="muted">Status: ${escapeHtml(h.status || '')}</div>
+      `;
+      hangar.appendChild(card);
+    });
+  }
+
+  // ---------------------------
+  // Owner-only forms (submit handlers)
+  // ---------------------------
+  document.getElementById('op-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const title = f.get('title')?.toString().trim();
+    const status = f.get('status')?.toString();
+    const etaStr = f.get('eta')?.toString();
+    const eta = etaStr ? new Date(etaStr).toISOString() : null;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.from('ops').insert({
+      title, status, eta, created_by: user?.id || null
+    });
+    document.getElementById('op-form-msg').textContent = error ? error.message : 'Added ✓';
+    if (!error) { e.currentTarget.reset(); loadOps(); }
+  });
+
+  document.getElementById('hull-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const label = f.get('label')?.toString().trim();
+    const klass = f.get('class')?.toString().trim() || null;
+    const status = f.get('status')?.toString();
+    const image_url = f.get('image_url')?.toString().trim() || null;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.from('hulls').insert({
+      label, class: klass, status, image_url, created_by: user?.id || null
+    });
+    document.getElementById('hull-form-msg').textContent = error ? error.message : 'Added ✓';
+    if (!error) { e.currentTarget.reset(); loadHangar(); }
+  });
+
+  // ---------------------------
+  // Boot
+  // ---------------------------
+  await initAuthUi();                 // sets chip/status + owner forms
+  await Promise.all([                 // initial loads
+    loadOps(), loadComms(), loadHangar()
+  ]);
+
+  // Light polling (keep if Realtime not configured yet)
+  setInterval(loadOps,    15000);
+  setInterval(loadComms,  12000);
+  setInterval(loadHangar, 20000);
+
+  // If you later enable Realtime publication:
+  // supabase.channel('ops-rt')
+  //   .on('postgres_changes', { event: '*', schema: 'public', table: 'ops' }, loadOps)
+  //   .subscribe();
+  // supabase.channel('comms-rt')
+  //   .on('postgres_changes', { event: '*', schema: 'public', table: 'comms' }, loadComms)
+  //   .subscribe();
+  // supabase.channel('hulls-rt')
+  //   .on('postgres_changes', { event: '*', schema: 'public', table: 'hulls' }, loadHangar)
+  //   .subscribe();
+
+</script>
+
+
 </body>
 </html>

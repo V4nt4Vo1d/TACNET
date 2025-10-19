@@ -73,7 +73,7 @@ function drawSystem(data) {
   circle(CX, CY, data.star.r, { class: 'planet', fill: 'rgba(255,59,213,.12)', stroke: '#ff3bd5' });
   label(CX - 42, CY - 12, data.system.toUpperCase(), { fill: '#ffd6f5' });
 
-  // Orbits (unique radii)
+  // Orbits
   const orbitRadii = new Set([
     ...data.planets.map(p => p.orbit),
     ...(data.jump_points || []).map(j => j.orbit)

@@ -20,25 +20,29 @@
 <body>
   <div class="shell">
     <div class="login panel">
-      <h2>Sign in</h2>
-      <form id="login-form">
-        <input class="input" type="text" name="username" placeholder="Callsign (e.g., Vanta)" required>
-        <input class="input" type="password" name="password" placeholder="Access Key (demo accepts anything)" required>
-        <button class="btn" type="submit">Enter TACNET</button>
-        <!-- <p class="muted">Demo mode stores a temp session token in your browser for ~12 hours.</p> -->
-      </form>
-    </div>
+  <h2>Sign in</h2>
+  <form id="login-form">
+    <input class="input" type="text" name="username" placeholder="Callsign" required>
+    <button class="btn" type="submit">Send sign-in link</button>
+    <label class="muted" style="display:block;margin-top:6px;">
+      <input type="checkbox" name="remember" checked>
+      Remember this device
+    </label>
+  </form>
+  <p id="msg" class="muted" style="margin-top:8px;"></p>
+  <p id="err" class="muted" style="color:#ff9fbf"></p>
+</div>
+
+
   </div>
   
-<script type="module">
+<!-- <script type="module">
   import { supabase } from './js/supabase.js';
 
-  // Canonicalize callsign -> pseudo email (MUST be identical for signup & login)
   function canonicalEmail(rawCallsign) {
     const cs = String(rawCallsign || '')
       .trim()
       .toLowerCase()
-      // keep letters/numbers/._- ; replace everything else with '-'
       .replace(/[^a-z0-9._-]+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
@@ -48,15 +52,14 @@
   const form = document.getElementById('login-form');
   const next = new URL(location.href).searchParams.get('next') || 'dashboard.html';
 
-  // Login/Signup toggle UI
   const modeSwitch = document.createElement('div');
   modeSwitch.className = 'muted';
   modeSwitch.style.marginTop = '8px';
-  modeSwitch.innerHTML = `
+ /* modeSwitch.innerHTML = `
     <label><input type="radio" name="mode" value="login" checked> Login</label>
     &nbsp;&nbsp;
     <label><input type="radio" name="mode" value="signup"> Sign up</label>
-  `;
+  `; */
   form.appendChild(modeSwitch);
 
   const err = document.createElement('p');
@@ -64,7 +67,6 @@
   err.style.color = '#ff9fbf';
   form.appendChild(err);
 
-  // If already signed in → go to next
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) location.href = next;
@@ -92,7 +94,7 @@
       if (mode === 'signup') {
         const { error } = await supabase.auth.signUp({
           email,
-          password,              // do NOT trim; passwords are exact
+          password,
           options: { data: { callsign: callsignInput.trim() } }
         });
         if (error) throw error;
@@ -109,7 +111,67 @@
       err.textContent = e2.message || 'Authentication failed.';
     }
   });
+</script> -->
+
+<script type="module">
+  import { supabase } from './js/supabase.js';
+
+  const ALLOWLIST = {
+    'vanta': 'v4nt4vo1d@gmail.com'
+  };
+
+  const form = document.getElementById('login-form');
+  const msg  = document.getElementById('msg');
+  const err  = document.getElementById('err');
+  const next = new URL(location.href).searchParams.get('next') || 'dashboard.html';
+
+  (async () => {
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('code')) {
+        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        if (error) throw error;
+        location.replace(next);
+        return;
+      }
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) location.replace(next);
+    } catch (e) {
+      console.error('SESSION INIT ERROR', e);
+    }
+  })();
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = '';
+    err.textContent = '';
+
+    const callsign = new FormData(form).get('username')?.toString().trim().toLowerCase();
+    if (!callsign) { err.textContent = 'Enter your callsign.'; return; }
+
+    const email = ALLOWLIST[callsign];
+    if (!email) { err.textContent = 'This callsign is not on the access list.'; return; }
+
+    try {
+      msg.textContent = `Verified: Sending sign-in link to ${email}...`;
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: location.origin + location.pathname,
+          data: { callsign }
+        }
+      });
+      if (error) throw error;
+      msg.textContent = `Link sent to ${email}. Open it on this device to finish signing in.`;
+    } catch (e2) {
+      console.error('MAGIC LINK ERROR', e2);
+      err.textContent = e2.message || 'Could not send sign-in link.';
+      msg.textContent = '';
+    }
+  });
 </script>
+
+
 
 
 </body>

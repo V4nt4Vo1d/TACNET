@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TACNET · Ships</title>
 
-  <style> body { opacity: 0 } .authed body { opacity: 1 } </style>
   <script type="module">
     import { supabase } from './js/supabase.js';
     (async () => {
@@ -61,20 +60,32 @@
     </main>
   </div>
 
-  <script type="module">
-    import { supabase } from './js/supabase.js';
-    window.addEventListener('DOMContentLoaded', async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const callsign = user?.user_metadata?.callsign || 'Operator';
-      const chip = document.getElementById('user-chip');
-      if (chip) chip.textContent = callsign;
+<script type="module">
+  import { supabase } from './js/supabase.js';
 
-      const out = document.getElementById('logout-btn');
-      if (out) out.addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        location.href = 'index.html';
-      });
-    });
-  </script>
+  function displayNameFor(callsign) {
+    if (!callsign) return 'Operator';
+    const cs = callsign.toString().trim().toLowerCase();
+    return cs === 'vanta' ? 'VANTΔ' : callsign;
+  }
+
+  const chip = document.getElementById('user-chip');
+  const statusEl = document.getElementById('auth-status'); // optional
+  const logoutBtn = document.getElementById('logout-btn');
+
+  (async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const callsign = user?.user_metadata?.callsign || 'Operator';
+
+    if (chip) chip.textContent = displayNameFor(callsign);
+    if (statusEl) statusEl.textContent = `Signed in as ${displayNameFor(callsign)}`;
+  })().catch(console.error);
+
+  logoutBtn?.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    location.href = 'login.html';
+  });
+</script>
+
 </body>
 </html>
