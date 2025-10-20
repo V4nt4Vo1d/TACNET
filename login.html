@@ -123,19 +123,44 @@
   const form = document.getElementById('login-form');
   const msg  = document.getElementById('msg');
   const err  = document.getElementById('err');
-  const next = new URL(location.href).searchParams.get('next') || 'dashboard.html';
+
+  const DEFAULT_NEXT = 'dashboard.html';
+  const next = new URL(location.href).searchParams.get('next') || DEFAULT_NEXT;
+
+  const DASHBOARD_URL = new URL('/dashboard.html', location.origin).toString();
+
+  async function waitForSession(maxWaitMs = 1500) {
+    const start = Date.now();
+    let { data: { session } } = await supabase.auth.getSession();
+    while (!session && Date.now() - start < maxWaitMs) {
+      await new Promise(r => setTimeout(r, 150));
+      ({ data: { session } } = await supabase.auth.getSession());
+    }
+    return session;
+  }
 
   (async () => {
     try {
       const url = new URL(window.location.href);
+
       if (url.searchParams.get('code')) {
         const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
         if (error) throw error;
         location.replace(next);
         return;
       }
+      if (window.location.hash.includes('access_token=')) {
+        const session = await waitForSession();
+        if (session) {
+          location.replace(next);
+          return;
+        }
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) location.replace(next);
+      if (session) {
+        location.replace(next);
+      }
     } catch (e) {
       console.error('SESSION INIT ERROR', e);
     }
@@ -154,13 +179,15 @@
 
     try {
       msg.textContent = `Verified: Sending sign-in link to ${email}...`;
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: location.origin + location.pathname,
-          data: { callsign }
+          emailRedirectTo: DASHBOARD_URL,   
+          data: { callsign }              
         }
       });
+
       if (error) throw error;
       msg.textContent = `Link sent to ${email}. Open it on this device to finish signing in.`;
     } catch (e2) {
@@ -170,6 +197,7 @@
     }
   });
 </script>
+
 
 
 
